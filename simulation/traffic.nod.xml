@@ -1,7 +1,0 @@
-<nodes>
-    <node id="junction_center" x="0.0" y="0.0" type="traffic_light"/>
-    <node id="junction_north" x="0.0" y="100.0" type="priority"/>
-    <node id="junction_south" x="0.0" y="-100.0" type="priority"/>
-    <node id="junction_east" x="100.0" y="0.0" type="priority"/>
-    <node id="junction_west" x="-100.0" y="0.0" type="priority"/>
-</nodes>
