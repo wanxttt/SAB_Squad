@@ -1,0 +1,13 @@
+<routes>
+    <vType id="car" accel="1.0" decel="4.5" length="5.0" maxSpeed="70.0"/>
+    <vType id="ambulance" accel="2.5" decel="4.5" length="7.0" maxSpeed="90.0" guiShape="emergency" color="red"/>
+
+    <route id="route_n_s" edges="edge_north_in edge_south_out"/>
+    <route id="route_e_w" edges="edge_east_in edge_west_out"/>
+    <route id="route_w_e" edges="edge_west_in edge_east_out"/>
+
+    <flow id="flow_n_s" type="car" begin="0" end="3600" vehsPerHour="500" route="route_n_s"/>
+    <flow id="flow_e_w" type="car" begin="0" end="3600" vehsPerHour="400" route="route_e_w"/>
+
+    <vehicle id="amb_1" type="ambulance" depart="200" route="route_w_e"/>
+</routes>

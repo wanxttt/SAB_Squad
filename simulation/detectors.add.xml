@@ -1,0 +1,6 @@
+<additional>
+    <e1Detector id="sensor_north" lane="edge_north_in_0" pos="50" freq="1" file="detectors_output.xml"/>
+    <e1Detector id="sensor_south" lane="edge_south_in_0" pos="50" freq="1" file="detectors_output.xml"/>
+    <e1Detector id="sensor_east" lane="edge_east_in_0" pos="50" freq="1" file="detectors_output.xml"/>
+    <e1Detector id="sensor_west" lane="edge_west_in_0" pos="50" freq="1" file="detectors_output.xml"/>
+</additional>
