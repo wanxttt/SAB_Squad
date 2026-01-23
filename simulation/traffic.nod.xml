@@ -4,4 +4,9 @@
     <node id="junction_south" x="0.0" y="-100.0" type="priority"/>
     <node id="junction_east" x="100.0" y="0.0" type="priority"/>
     <node id="junction_west" x="-100.0" y="0.0" type="priority"/>
+
+    <node id="junction_east_2" x="200.0" y="0.0" type="traffic_light"/>
+    <node id="junction_east_north" x="200.0" y="100.0" type="priority"/>
+    <node id="junction_east_south" x="200.0" y="-100.0" type="priority"/>
+    <node id="junction_far_east" x="300.0" y="0.0" type="priority"/>
 </nodes>
