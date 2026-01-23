@@ -2,66 +2,61 @@ import cv2
 from ultralytics import YOLO
 import os
 
-# --- CONFIGURATION ---
-# Get the absolute path to the video file next to this script
+# --- PATH CONFIGURATION ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
+# Loading your custom 'best.pt' if you have it, otherwise fallback to yolov8n
+model_path = os.path.join(current_dir, "best.pt") if os.path.exists("best.pt") else "yolov8n.pt"
 video_path = os.path.join(current_dir, "traffic_video.mp4")
 
-# --- LOAD THE AI MODEL ---
-print("Loading YOLOv8 AI Model... (this might take a moment first time)")
-# We use 'yolov8n.pt' (Nano). It's the fastest, smallest model.
-# It will download automatically the first time you run this.
-model = YOLO('yolov8n.pt') 
+model = YOLO(model_path)
 
-# --- OPEN VIDEO SOURCE ---
+# --- LINE CROSSING CONFIG ---
+# Define a horizontal line in the middle of the frame
+line_y = 400 
+counter = 0
+already_counted = []
+
 cap = cv2.VideoCapture(video_path)
 
-if not cap.isOpened():
-    print(f"❌ Error: Could not open video file: {video_path}")
-    exit()
+print(f"Using Model: {model_path}")
+print("Starting Line-Crossing Detection...")
 
-print("Video opened successfully. Starting detection loop...")
-print("Press 'Q' on your keyboard to stop.")
-
-# --- MAIN PROCESS LOOP ---
-while True:
-    # 1. Read a frame from the video
+while cap.isOpened():
     success, frame = cap.read()
     if not success:
-        print("End of video reached.")
-        break # Stop loop if video ends
+        break
 
-    # 2. Run AI inference on the frame
-    # stream=True makes it faster for video generators
-    results = model(frame, stream=True)
+    # Run tracking (persist=True keeps track of the same car across frames)
+    results = model.track(frame, persist=True, device='cpu')
 
-    # 3. Process the results
-    for r in results:
-        # The model automatically draws the boxes and labels onto the frame for us
-        annotated_frame = r.plot()
-
-        # --- Calculate Counts (Optional Data gathering) ---
-        # Get the detected classes indices
-        classes = r.boxes.cls.cpu().numpy()
-        # Count specific vehicle types (based on COCO dataset indices: 2=car, 3=motorcycle, 5=bus, 7=truck)
-        car_count = (classes == 2).sum()
-        truck_count = (classes == 7).sum()
-        bus_count = (classes == 5).sum()
+    if results[0].boxes.id is not None:
+        boxes = results[0].boxes.xyxy.cpu().numpy()
+        ids = results[0].boxes.id.cpu().numpy().astype(int)
         
-        # Add a counter overlay to the video
-        info_text = f"Cars: {car_count} | Trucks: {truck_count} | Buses: {bus_count}"
-        cv2.putText(annotated_frame, info_text, (20, 40), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+        for box, id in zip(boxes, ids):
+            # Get center point of the bottom of the bounding box
+            cx = int((box[0] + box[2]) / 2)
+            cy = int(box[3]) 
 
+            # Draw center point
+            cv2.circle(frame, (cx, cy), 4, (0, 255, 255), -1)
 
-    # 4. Display the resulting frame
-    cv2.imshow("Traffic-Pulse Vision Demo (YOLOv8)", annotated_frame)
+            # Check if vehicle crossed the line
+            if line_y - 5 < cy < line_y + 5:
+                if id not in already_counted:
+                    counter += 1
+                    already_counted.append(id)
 
-    # 5. Wait for 'Q' key to exit Wait 1ms between frames
+    # UI Visuals
+    # Draw the "Trigger Line"
+    cv2.line(frame, (0, line_y), (1280, line_y), (0, 0, 255), 3)
+    cv2.putText(frame, f"TOTAL VEHICLES PASSED: {counter}", (50, 50), 
+                cv2.FONT_HERSHEY_DUPLEX, 1.2, (0, 255, 0), 2)
+
+    cv2.imshow("Traffic Monitoring System", frame)
+
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# --- CLEANUP ---
 cap.release()
 cv2.destroyAllWindows()
-print("Vision demo finished.")
